@@ -1,8 +1,10 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace BulkyBook.Controllers
 {
@@ -23,14 +25,39 @@ namespace BulkyBook.Controllers
             IEnumerable<Product> products = _uow.Product.GetAll(includeProperties: "Category,CoverType");
             return View(products);
         }
-        public IActionResult Details(int id)
+        public IActionResult Details(int productId)
         {
             ShoppingCart sc = new() 
             { 
-                Product = _uow.Product.GetFirstOrDefault(x => x.Id == id, includeProperties:"Category,CoverType"),
-                Count = 1,
+                Product = _uow.Product.GetFirstOrDefault(x => x.Id == productId, includeProperties:"Category,CoverType"),
+                ProductId = productId,
+                Count = 1
             };
             return View(sc);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public IActionResult Details(ShoppingCart shoppingCart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            shoppingCart.ApplicationUserId = claim.Value;
+
+            ShoppingCart scFromDB = _uow.ShoppingCart.GetFirstOrDefault(x => x.ApplicationUserId == claim.Value && x.ProductId == shoppingCart.ProductId);
+
+            if (scFromDB == null)
+            {
+                _uow.ShoppingCart.Add(shoppingCart);
+            }
+            else
+            {
+                _uow.ShoppingCart.IncrementCount(scFromDB, shoppingCart.Count);
+            }
+
+            _uow.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()
