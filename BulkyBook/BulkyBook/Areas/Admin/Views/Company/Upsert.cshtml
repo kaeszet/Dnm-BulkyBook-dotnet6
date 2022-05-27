@@ -1,0 +1,83 @@
+﻿@model Company
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+
+<form asp-action="Upsert" enctype="multipart/form-data">
+    <input asp-for="Id" hidden />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="border p-3 mt-4 row">
+                <div class="col-12 pb-2">
+                    <h2 class="text-primary">@(Model.Id != 0 ? "Update" : "Create") Company</h2>
+                    <hr />
+                </div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="StreetAddress" class="control-label"></label>
+                    <textarea asp-for="StreetAddress" rows="3" class="form-control"></textarea>
+                    <span asp-validation-for="StreetAddress" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-4">
+                    <label asp-for="PostalCode" class="control-label"></label>
+                    <input asp-for="PostalCode" class="form-control" />
+                    <span asp-validation-for="PostalCode" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-4">
+                    <label asp-for="City" class="control-label"></label>
+                    <input asp-for="City" class="form-control" />
+                    <span asp-validation-for="City" class="text-danger"></span>
+                </div>
+                <div class="mb-3 col-4">
+                    <label asp-for="PhoneNumber" class="control-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group col-12">
+                    @if (Model.Id != 0)
+                    {
+                        <input type="submit" value="Update" class="btn btn-primary" style="width: 150px" />
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary" style="width: 150px">Create</button>
+                    }
+                    <a asp-action="Index" class="btn btn-secondary" style="width: 150px">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</form>
+
+@section Scripts {
+ @{
+    <partial name="_ValidationScriptsPartial" />
+ }
+<script>
+
+    tinymce.init({
+      selector: 'textarea',
+      plugins: 'a11ychecker advcode casechange export formatpainter image editimage linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tableofcontents tinycomments tinymcespellchecker',
+      toolbar: 'a11ycheck addcomment showcomments casechange checklist code export formatpainter image editimage pageembed permanentpen table tableofcontents',
+      toolbar_mode: 'floating',
+      tinycomments_mode: 'embedded',
+      tinycomments_author: 'Author name',
+    });
+
+</script>
+}
+
+
+
+
+
