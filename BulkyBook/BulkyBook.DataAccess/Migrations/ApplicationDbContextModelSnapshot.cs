@@ -186,7 +186,7 @@ namespace BulkyBook.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TrackingStatus")
+                    b.Property<string>("TrackingNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

@@ -1,6 +1,7 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
+using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -12,24 +13,24 @@ namespace BulkyBook.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IUnitOfWork _uow;
+        private readonly IUnitOfWork _unitOfWork;
 
         public HomeController(ILogger<HomeController> logger, IUnitOfWork uow)
         {
             _logger = logger;
-            _uow = uow;
+            _unitOfWork = uow;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> products = _uow.Product.GetAll(includeProperties: "Category,CoverType");
+            IEnumerable<Product> products = _unitOfWork.Product.GetAll(includeProperties: "Category,CoverType");
             return View(products);
         }
         public IActionResult Details(int productId)
         {
             ShoppingCart sc = new() 
             { 
-                Product = _uow.Product.GetFirstOrDefault(x => x.Id == productId, includeProperties:"Category,CoverType"),
+                Product = _unitOfWork.Product.GetFirstOrDefault(x => x.Id == productId, includeProperties:"Category,CoverType"),
                 ProductId = productId,
                 Count = 1
             };
@@ -44,18 +45,19 @@ namespace BulkyBook.Controllers
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
             shoppingCart.ApplicationUserId = claim.Value;
 
-            ShoppingCart scFromDB = _uow.ShoppingCart.GetFirstOrDefault(x => x.ApplicationUserId == claim.Value && x.ProductId == shoppingCart.ProductId);
+            ShoppingCart scFromDB = _unitOfWork.ShoppingCart.GetFirstOrDefault(x => x.ApplicationUserId == claim.Value && x.ProductId == shoppingCart.ProductId);
 
             if (scFromDB == null)
             {
-                _uow.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == claim.Value).ToList().Count);
             }
             else
             {
-                _uow.ShoppingCart.IncrementCount(scFromDB, shoppingCart.Count);
+                _unitOfWork.ShoppingCart.IncrementCount(scFromDB, shoppingCart.Count);
+                _unitOfWork.Save();
             }
-
-            _uow.Save();
 
             return RedirectToAction(nameof(Index));
         }

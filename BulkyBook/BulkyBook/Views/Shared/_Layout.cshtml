@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http;
+@using BulkyBook.Utility
+@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,25 +33,36 @@
                                 <span class="visually-hidden">(current)</span>
                             </a>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">CMS</a>
-                            <div class="dropdown-menu">
-                            <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
-                            <a class="dropdown-item" asp-area="Admin" asp-controller="CoverType" asp-action="Index">CoverType</a>
-                            <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
-                            <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
-                            </div>
+                        @if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">CMS</a>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="CoverType" asp-action="Index">CoverType</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Create User</a>
+                                </div>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                <i class="bi bi-signpost-split-fill"></i> Manage Order
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="Index">
-                                <i class="bi bi-bag"></i>
+                                @await Component.InvokeAsync("ShoppingCart")
                             </a>
                         </li>
+
                     </ul>
                     <partial name="_loginPartial" />
                     @*<form class="d-flex">
-                        <input class="form-control me-sm-2" type="text" placeholder="Search">
-                        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                    <input class="form-control me-sm-2" type="text" placeholder="Search">
+                    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
                     </form>*@
                 </div>
             </div>

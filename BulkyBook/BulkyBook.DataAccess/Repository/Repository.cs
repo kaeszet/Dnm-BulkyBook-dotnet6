@@ -42,20 +42,36 @@ namespace BulkyBook.DataAccess.Repository
             return query.ToList();
         }
 
-        public T GetFirstOrDefault(Expression<Func<T, bool>> predicate, string? includeProperties = null)
+        public T GetFirstOrDefault(Expression<Func<T, bool>> predicate, string? includeProperties = null, bool tracked = true)
         {
-            IQueryable<T> query = dbSet;
-            query = query.Where(predicate);
-
-            if (includeProperties != null)
+            if (tracked)
             {
-                foreach (var property in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(property);
-                }
-            }
+                IQueryable<T> query = dbSet;
 
-            return query.FirstOrDefault();
+                query = query.Where(predicate);
+                if (includeProperties != null)
+                {
+                    foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        query = query.Include(includeProp);
+                    }
+                }
+                return query.FirstOrDefault();
+            }
+            else
+            {
+                IQueryable<T> query = dbSet.AsNoTracking();
+
+                query = query.Where(predicate);
+                if (includeProperties != null)
+                {
+                    foreach (var includeProp in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        query = query.Include(includeProp);
+                    }
+                }
+                return query.FirstOrDefault();
+            }
         }
 
         public void Remove(T entity)
